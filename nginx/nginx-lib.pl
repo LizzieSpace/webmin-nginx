@@ -62,21 +62,6 @@ sub get_pid_file
 	return $nginfo{'pid-path'} if ($nginfo{'pid-path'});
 }
 
-sub restart_button
-{
-	my $rv;
-	$args = "redir=".&urlize(&this_url());
-	my @rv;
-	if (&is_nginx_running()) {
-		push(@rv, "<a href=\"reload.cgi?$args\">$text{'nginx_apply'}</a>\n");
-		#push(@rv, "<a href=\"restart.cgi?$args\">$text{'nginx_restart'}</a>\n");
-		push(@rv, "<a href=\"stop.cgi?$args\">$text{'nginx_stop'}</a>\n");
-	}
-	else {
-		push(@rv, "<a href=\"start.cgi?$args\">$text{'nginx_start'}</a>\n");
-	}
-	return join("<br>\n", @rv);
-}
 
 # Attempts to stop the running nginx process
 sub stop_nginx

@@ -25,7 +25,6 @@ foreach $v (@virts) {
 
 # Page header
 &ui_print_header(undef, $text{'index_title'}, "", undef, 1, 1, undef,
-  &restart_button() . "<br>".
   &help_search_link("nginx", "man", "doc", "google"), undef, undef,
   &text('index_version', $nginfo{'version'}));
 
@@ -100,5 +99,26 @@ print ui_tabs_start_tab('mode', 'create');
 print ui_tabs_end_tab('mode', 'create');
 
 print ui_tabs_end();
+
+# Show start / stop buttons
+print &ui_hr();
+print &ui_buttons_start();
+if (&is_nginx_running()) {
+    print &ui_buttons_row(
+        "stop.cgi",
+        $text{'index_stop'},
+        $text{'index_stopdesc'});
+	print &ui_buttons_row(
+        "reload.cgi",
+        $text{'index_restart'},
+        $text{'index_restartdesc'});
+	}
+else {
+	print &ui_buttons_row(
+        "start.cgi",
+        $text{'index_start'},
+        $text{'index_startdesc'});
+	}
+print &ui_buttons_end();
 
 ui_print_footer("/", $text{'index'});
