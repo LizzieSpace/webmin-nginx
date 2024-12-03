@@ -8,19 +8,19 @@ require './nginx-lib.pl';
 
 # add virtual servers
 my @virts = &get_servers();
-foreach $v (@virts) {
-  $idx = &indexof($v, @$conf);
-  $sn = basename($v);
-  $status = '<span style="color:darkgreen">' . $text{'status_enabled'} . '</span>';
+foreach my $v (@virts) {
+  # $idx = &indexof($v, @$conf);
+  my $sn = basename($v);
+  my $status = '<span style="color:darkgreen">' . $text{'status_enabled'} . '</span>';
   if (!-e "$config{'link_dir'}/$sn") {
     $status = $text{'status_disabled'};
   }
-  push(@vidx, $sn);
-  push(@vstatus, "$status");
-  push(@vname, $sn);
-  push(@vlink, "edit_server.cgi?editfile=$sn");
-  push(@vroot, &find_directives($v, 'root'));
-  push(@vurl, encode_entities(&find_directives($v, 'server_name')));
+  push(our @vidx, $sn);
+  push(our @vstatus, "$status");
+  push(our @vname, $sn);
+  push(our @vlink, "edit_server.cgi?editfile=$sn");
+  push(our @vroot, &find_directives($v, 'root'));
+  push(our @vurl, encode_entities(&find_directives($v, 'server_name')));
 }
 
 # Page header
@@ -33,28 +33,39 @@ $config{'messages'} = '';
 save_module_config();
 &ui_print_header(undef, $text{'index_title'}, "", undef, 1, 1);
 
-@tabs = (['global', 'Global Configuration'], ['existing', 'Existing Virtual Hosts'], ['create', 'Create Virtual Host']);
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Global settings
 
-print ui_tabs_start(\@tabs, 'mode', 'existing');
+print &ui_subheading($text{'index_global'});
+my $global_icon = {
+  "icon" => "images/nginx_edit.png",
+  "name" => $text{'gl_edit'},
+  "link" => "edit_server.cgi?editfile=$config{'nginx_conf'}"
+};
+my $proxy_icon = {
+  "icon" => "images/edit_proxy.png",
+  "name" => $text{'gl_proxy'},
+  "link" => "edit_server.cgi?editfile=proxy.conf"
+};
+my $det_icon = {
+  "icon" => "images/nginx_details.png",
+  "name" => $text{'gl_details'},
+  "link" => "details.cgi"
+};
+&config_icons($global_icon, $proxy_icon, $det_icon);
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Virtual Servers Table
 
-print ui_tabs_start_tab('mode', 'global');
-  $global_icon = { "icon" => "images/nginx_edit.png",
-    "name" => $text{'gl_edit'},
-    "link" => "edit_server.cgi?editfile=$config{'nginx_conf'}" };
-  $proxy_icon = { "icon" => "images/edit_proxy.png",
-    "name" => $text{'gl_proxy'},
-    "link" => "edit_server.cgi?editfile=proxy.conf" };
-  $det_icon = { "icon" => "images/nginx_details.png",
-    "name" => $text{'gl_details'},
-    "link" => "details.cgi" };
-  &config_icons($global_icon, $proxy_icon, $det_icon);
-print ui_tabs_end_tab('mode', 'global');
+print &ui_hr();
 
-print ui_tabs_start_tab('mode', 'existing');
-  @links = ( );
-  push(@links, &select_all_link("d"), &select_invert_link("d"));
+print &ui_subheading($text{'index_virts'});
+my @links;
+  push(
+      @links,
+      &select_all_link("d"),
+      &select_invert_link("d"),
+  );
   print &ui_form_start("update_server.cgi", "get");
-  print &ui_links_row(\@links);
   print &ui_columns_start([
     $text{'index_select'},
     $text{'index_status'},
@@ -63,7 +74,7 @@ print ui_tabs_start_tab('mode', 'existing');
 #     $text{'index_port'},
     $text{'index_root'},
     $text{'index_url'} ], 100);
-  for($i=0; $i<@vname; $i++) {
+  for(my $i=0; $i<@vname; $i++) {
     my @cols;
     push(@cols, "$vstatus[$i]");
     push(@cols, "<a href=\"$vlink[$i]\">$vname[$i]</a>");
@@ -78,31 +89,16 @@ print ui_tabs_start_tab('mode', 'existing');
   print &ui_select("action", "",
     [ ['_none', $text{'opt_select'}], ['enable', $text{'opt_enable'}], ['disable', $text{'opt_disable'}], ['delete', $text{'opt_delete'}] ]);
   print &ui_form_end([ [ "submit", $text{'btn_submit'} ] ]);
-print ui_tabs_end_tab('mode', 'existing');
 
-print ui_tabs_start_tab('mode', 'create');
-  #plain open document creation here
-  print &ui_form_start("create_server.cgi", "form-data");
-
-    print &ui_table_start($text{'index_create'}, undef, 2);
-    print &ui_table_row("Server Name",
-      &ui_textbox("newserver", undef, 40));
-
-    print &ui_table_row("Config",
-      &ui_textarea("directives", undef, 25, 80, undef, undef,"style='width:100%'"));
-
-    print &ui_table_row("",
-      &ui_submit($text{'save'}));
-
-    print &ui_table_end();
-  print &ui_form_end();
-print ui_tabs_end_tab('mode', 'create');
-
-print ui_tabs_end();
-
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # Show start / stop buttons
 print &ui_hr();
+
 print &ui_buttons_start();
+print &ui_buttons_row(
+    "server_creation_form.cgi",
+    $text{'index_create'}
+);
 if (&is_nginx_running()) {
     print &ui_buttons_row(
         "stop.cgi",

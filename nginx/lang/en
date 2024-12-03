@@ -27,12 +27,15 @@ gl_details=View nginx details
 manual_title=Edit Config File
 manual_header=Use the text box below to manually edit the nginx config file for $1.
 
+index_global=Global Settings
+index_virts=Virtual Hosts
 index_stop=Stop Nginx Webserver
 index_stopdesc=Shut down all running Nginx webserver processes.
 index_start=Start Nginx Webserver
 index_startdesc=Start up the Nginx webserver using the current configuration.
 index_restart=Apply Nginx Configuration
 index_restartdesc=Apply the current configuration by stopping and re-starting the Nginx webserver.
+index_create=Create Server
 
 #stop_nginx=nginx stopped manually
 stop_epid=Failed to open PID file
